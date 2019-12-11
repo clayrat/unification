@@ -1,0 +1,7 @@
+package unification
+
+sourcedir = src
+
+modules = Main
+
+pkgs = contrib
