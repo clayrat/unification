@@ -99,3 +99,42 @@ parameters (name : Nat -> Type, decEqName : (i : Nat) -> (x, y : name i) -> Dec 
 
   unify : Term m -> Term m -> Maybe (n ** Subst m n)
   unify {m} t1 t2 = unifyAcc t1 t2 (m ** Nul)
+
+  -- correctness proof
+
+  mutual
+    -- proof that Var is the identity of replace
+    replaceThm1 : (t : Term n) -> replace Var t = t
+    replaceThm1 (Var x)    = Refl
+    replaceThm1 (Con s ts) = cong {f=Con s} (replaceChildrenThm1 ts)
+
+    replaceChildrenThm1 : (ts : Vect k (Term n)) -> replaceChildren Var ts = ts
+    replaceChildrenThm1 []        = Refl
+    replaceChildrenThm1 (t :: ts) = rewrite replaceThm1 t in
+                                    cong (replaceChildrenThm1 ts)
+
+-- test
+
+data Sym : Nat -> Type where
+  CONS  : Sym 2
+  NIL   : Sym 0
+  ZERO  : Sym 0
+
+Uninhabited (NIL = ZERO) where
+  uninhabited Refl impossible
+
+Uninhabited (ZERO = NIL) where
+  uninhabited Refl impossible
+
+DecEqSym : (k : Nat) -> (f, g : Sym k) -> Dec (f = g)
+DecEqSym (S (S Z)) CONS CONS = Yes Refl
+DecEqSym       Z   NIL  NIL  = Yes Refl
+DecEqSym       Z   ZERO ZERO = Yes Refl
+DecEqSym       Z   NIL  ZERO = No absurd
+DecEqSym       Z   ZERO NIL  = No absurd
+
+tm1 : Term Sym DecEqSym 2
+tm1 = Con Sym DecEqSym CONS [Var Sym DecEqSym FZ, Con Sym DecEqSym CONS [Var Sym DecEqSym FZ, Con Sym DecEqSym NIL []]]
+
+tm2 : Term Sym DecEqSym 2
+tm2 = Con Sym DecEqSym CONS [Con Sym DecEqSym ZERO [], Var Sym DecEqSym (FS FZ)]

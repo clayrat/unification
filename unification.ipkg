@@ -2,6 +2,6 @@ package unification
 
 sourcedir = src
 
-modules = Main
+modules = FO.Unification
 
 pkgs = contrib
