@@ -113,11 +113,12 @@ parameters (name : Nat -> Type, decEqName : (i : Nat) -> (x, y : name i) -> Dec 
     replaceChildrenThm1 (t :: ts) = rewrite replaceThm1 t in
                                     cong (replaceChildrenThm1 ts)
 
--- test
+-- example from wikipedia
 
 data Sym : Nat -> Type where
   CONS  : Sym 2
   NIL   : Sym 0
+  SUCC  : Sym 1
   ZERO  : Sym 0
 
 Uninhabited (NIL = ZERO) where
@@ -128,6 +129,7 @@ Uninhabited (ZERO = NIL) where
 
 DecEqSym : (k : Nat) -> (f, g : Sym k) -> Dec (f = g)
 DecEqSym (S (S Z)) CONS CONS = Yes Refl
+DecEqSym    (S Z)  SUCC SUCC = Yes Refl
 DecEqSym       Z   NIL  NIL  = Yes Refl
 DecEqSym       Z   ZERO ZERO = Yes Refl
 DecEqSym       Z   NIL  ZERO = No absurd
@@ -137,4 +139,4 @@ tm1 : Term Sym DecEqSym 2
 tm1 = Con Sym DecEqSym CONS [Var Sym DecEqSym FZ, Con Sym DecEqSym CONS [Var Sym DecEqSym FZ, Con Sym DecEqSym NIL []]]
 
 tm2 : Term Sym DecEqSym 2
-tm2 = Con Sym DecEqSym CONS [Con Sym DecEqSym ZERO [], Var Sym DecEqSym (FS FZ)]
+tm2 = Con Sym DecEqSym CONS [Con Sym DecEqSym SUCC [Con Sym DecEqSym SUCC [Con Sym DecEqSym ZERO []]], Var Sym DecEqSym (FS FZ)]
